@@ -1,23 +1,20 @@
 `timescale 1ns / 1ps
 
 ////////////////////////////////////////////////////////////////////////////////
-//
-//Percent Effort:
-// Seti 50%
-// Hannah 50%
 ////////////////////////////////////////////////////////////////////////////////
 
-module TopModule(Clk, Reset, en_out, out7); 
+module TopModule(Clk, Reset, PCResult, WriteData); 
 
-    input Clk;
-    input Reset;
-    output [7:0]en_out;
-    output [6:0]out7;
-    wire ClkOut;
-    wire [31:0]Instruction, PCResult;
+   input Clk;
+   input Reset;
+//    output [7:0]en_out;
+//    output [6:0]out7;
+   wire ClkOut = Clk;
+   output [31:0] PCResult;       // Output for PC count
+   output [31:0] WriteData;      // Output for write-back data
     
-   // ClkDiv _ClkDiv(Clk, Reset, ClkOut);
-    //Two4DigitDisplay _Two4DigitDisplay(Clk, ID_WriteData[15:0], WB_PCAddResult[15:0] - 4, out7, en_out);
+   //ClkDiv _ClkDiv(Clk, Reset, ClkOut);
+  // Two4DigitDisplay _Two4DigitDisplay(Clk, ID_WriteData[15:0], WB_PCAddResult[15:0] - 4, out7, en_out);
 
     //IF Wires
     wire [31:0] IF_PCInput;
@@ -101,29 +98,39 @@ module TopModule(Clk, Reset, en_out, out7);
     wire [31:0] WB_PCAddResult;
     wire [31:0] WB_MemReadData;
     wire [31:0] WB_WBToWD;
-    
-    //IF
+ 
+    // IF
+    // ProgramCounter(Clk, Reset, input_address, output_address)
     ProgramCounter _PC(
         ClkOut, 
         Reset, 
         IF_PCInput, 
         IF_PCOutput);
+        
     // PCAdder(PCResult, PCAddResult)
     PCAdder _PCAdder(
-        .PCResult(PCResult),
-        .PCAddResult(PCAddResult)
-        );
+    
+       IF_PCOutput,    // Input should be current PC value
+       IF_PCAddResult  // Output is PC+4
+       );
+        
+    // Or(inA, inB, Out)
     Or _Or(
-        IF_PCSrcSelector, 
         MEM_PCSrc[0], 
-        MEM_ZeroANDBranch);
-    Mux32bits4to1 _PCSrcMux(
-        {MEM_PCSrc[1], IF_PCSrcSelector}, 
+        MEM_ZeroANDBranch,
+        IF_PCSrcSelector
+        );
+        
+    // Mux32bits4to1(A, B, C, D, Src, Out)
+    Mux32bits4to1 _PCSrcMux( 
         IF_PCAddResult,
         MEM_BranchAdderOutput, 
         MEM_JumpOutput, 
         MEM_ReadData1, 
+        {MEM_PCSrc[1], IF_PCSrcSelector},
         IF_PCInput);
+        
+    // InstructionMemory(Address, Instruction)
     InstructionMemory _IM(
         IF_PCOutput, 
         IF_Instruction);
@@ -140,6 +147,8 @@ module TopModule(Clk, Reset, en_out, out7);
         ID_PCAddResult);
 
     //ID
+    // Controller(Instruction, ShiftCheck, RegWrite, ALUSrc,
+    //  ALUOp, RegDst, MemWrite, MemRead, MemtoReg, PCSrc, Jal, Branch, Shift)
     Controller _Controller(
         ID_Instruction[31:26], 
         ID_Instruction[5:0],
@@ -154,11 +163,16 @@ module TopModule(Clk, Reset, en_out, out7);
         ID_Jal, 
         ID_Branch, 
         ID_Shift);
-    Mux32bits2to1 _JalMux(
-        ID_WriteData, 
+        
+    // Mux32bits2to1(inA, inB, Sel, Out)
+    Mux32bits2to1 _JalMux(    // checked 
         WB_WBToWD, 
         WB_PCAddResult, 
-        WB_Jal);
+        WB_Jal,
+        ID_WriteData);
+        
+    // RegisterFile(ReadRegister1, ReadRegister2,
+    // WriteRegister, WriteData, RegWrite, Clk, ReadData1, ReadData2)
     RegisterFile _Register(
         ID_Instruction[25:21], 
         ID_Instruction[20:16], 
@@ -168,6 +182,8 @@ module TopModule(Clk, Reset, en_out, out7);
         ClkOut, 
         ID_ReadData1, 
         ID_ReadData2);
+    
+    // SignExtension(in, out) 
     SignExtension _SE(
         ID_Instruction[15:0], 
         ID_SEOutput);
@@ -213,47 +229,71 @@ module TopModule(Clk, Reset, en_out, out7);
 );
 
     //EX
-    Sll _Shift(
-        EX_ShiftOutput, 
-        EX_SEOutput);
-    Adder _BranchAdder(
-        EX_BranchAdderOutput, 
-        EX_PCAddResult, 
+    
+    // Sll(in, out)
+    Sll _Shift( 
+        EX_SEOutput, 
         EX_ShiftOutput);
-    Mux32bits2to1 _ShiftMux(
-        EX_ALUInput1, 
+        
+    // Adder(inA, inB, Out)
+    Adder _BranchAdder(
+        EX_PCAddResult, 
+        EX_ShiftOutput,
+        EX_BranchAdderOutput);
+    
+    // Mux32bits2to1(inA, inB, Sel, Out)
+    Mux32bits2to1 _ShiftMux( //  checked
         EX_ReadData1, 
         EX_ReadData2, 
-        EX_Shift);
-    Mux32bits2to1 _ALUSrcMux(
-        EX_ALUSrcOutput, 
+        EX_Shift,
+        EX_ALUInput1);
+        
+    // Mux32bits2to1(inA, inB, Sel, Out)
+    Mux32bits2to1 _ALUSrcMux( 
         EX_ReadData2, 
         EX_SEOutput, 
-        EX_ALUSrc);
+        EX_ALUSrc,
+        EX_ALUSrcOutput);
+        
+    // ALU(ALUControl, A, B, ALUResult, Zero)
     ALU _ALU(
         EX_ALUControlOutput, 
         EX_ALUInput1, ///////
         EX_ALUSrcOutput, 
         EX_ALUResult, 
         EX_Zero);
+    
+    // ALUControl(ALUOp, Opcode, RT, Ctrl)
     ALUControl _ALUControl(
         EX_ALUOp, 
         EX_Instruction26b[5:0], 
         EX_Instruction26b[20:16], 
         EX_ALUControlOutput);
+        
+    // Jump(Immediate, PCOut, Address)
     Jump _Jump(
         EX_Instruction26b, 
         EX_PCOutput, 
         EX_JumpOutput);
+    
+    // Mux5bits3to1(inA, inB, inC, Sel, Out)
     Mux5bits3to1 _RegDstMux(
-        EX_RegWriteAddress, 
         EX_Instruction26b[20:16], 
         EX_Instruction26b[15:11], 
         5'b11111, 
-        EX_RegDst);
+        EX_RegDst,
+        EX_RegWriteAddress);
 
 
     //EX/MEM Register
+    // EX_MEMRegister(Clk, Reset, MemToReg_in, MemRead_in,
+    // MemWrite_in, RegWrite_in, Jal_in, RegWriteAddress_in,
+    // ALUResult_in, Zero_in, ReadData2_in, PCAdderOut_in, JumpOutput_in,
+    // BranchAdderOut_in, PCSrc_in, ReadData1_in, Branch_in,
+    // MemToReg_out, MemRead_out, MemWrite_out, RegWrite_out,
+    // Jal_out, RegWriteAddress_out, ALUResult_out, Zero_out,
+    // ReadData2_out, PCAdderOut_out, JumpOutput_out,
+    // BranchAdderOut_out, PCSrc_out, ReadData1_out, Branch_out)
     EX_MEMRegister EX_MEMReg(
         ClkOut,
         Reset,
@@ -290,6 +330,7 @@ module TopModule(Clk, Reset, en_out, out7);
 );
 
     //MEM
+    // DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData)
     DataMemory _DM(
         MEM_ALUResult, 
         MEM_ReadData2, 
@@ -297,13 +338,19 @@ module TopModule(Clk, Reset, en_out, out7);
         MEM_MemWrite, 
         MEM_MemRead, 
         MEM_MemReadData);
+        
+    // And(inA, inB, Out)
     And _ZeroANDBranch(
-        MEM_ZeroANDBranch,
         MEM_Branch,
-        MEM_Zero);
+        MEM_Zero,
+        MEM_ZeroANDBranch);
     
 
-    //MEM/WB Register
+    // MEM_WBRegister(Clk, Reset, MemToReg_in,
+    // RegWrite_in, Jal_in, RegWriteAddress_in, ALUResult_in, PCAdderOut_in,
+    //MemReadData_in, MemToReg_out, RegWrite_out, Jal_out,
+    // RegWriteAddress_out, ALUResult_out, PCAdderOut_out,
+    // MemReadData_out)
     MEM_WBRegister MEM_RBReg(
         ClkOut,
         Reset,
@@ -322,13 +369,16 @@ module TopModule(Clk, Reset, en_out, out7);
         WB_PCAddResult,
         WB_MemReadData
     );
-
+  
     //WB
-    Mux32bits2to1 _MemToRegMux(
-        WB_WBToWD, 
+    // Mux32bits2to1(inA, inB, Sel, Out)
+    Mux32bits2to1 _MemToRegMux( 
         WB_MemReadData, 
         WB_ALUResult, 
-        WB_MemToReg);
+        WB_MemToReg,
+        WB_WBToWD);
 
+    assign PCResult = IF_PCOutput;       // PC count from IF stage
+    assign WriteData = WB_WBToWD;        // Final write-back data in WB stage
 
 endmodule
