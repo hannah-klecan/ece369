@@ -14,6 +14,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
    output [31:0] WriteData;      // Output for write-back data
     
    //ClkDiv _ClkDiv(Clk, Reset, ClkOut);
+   //Two4DigitDisplay _Two4DigitDisplay(Clk,PCResult, WriteData
   // Two4DigitDisplay _Two4DigitDisplay(Clk, ID_WriteData[15:0], WB_PCAddResult[15:0] - 4, out7, en_out);
 
     //IF Wires
@@ -378,7 +379,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         WB_MemToReg,
         WB_WBToWD);
 
-    assign PCResult = IF_PCOutput;       // PC count from IF stage
-    assign WriteData = WB_WBToWD;        // Final write-back data in WB stage
+    assign PCResult = WB_PCAddResult;       
+    assign WriteData = ID_WriteData;       
 
 endmodule
