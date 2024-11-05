@@ -3,15 +3,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-module TopModule(Clk, Reset, PCResult, WriteData); //, ShiftCheck, Instr, ReadData, ALUControlOut); 
+module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALUControlOut); 
 
    input Clk;
    input Reset;
-//    output [7:0]en_out;
-//    output [6:0]out7;
+    output [7:0]en_out;
+    output [6:0]out7;
    wire ClkOut = Clk;
-   output [31:0] PCResult;       // Output for PC count
-   output [31:0] WriteData;      // Output for write-back data
+   wire [31:0] PCResult;       // Output for PC count
+   wire [31:0] WriteData;      // Output for write-back data
     
 //   output [5:0] ShiftCheck;
 //   output [5:0] Instr;      
@@ -27,8 +27,10 @@ module TopModule(Clk, Reset, PCResult, WriteData); //, ShiftCheck, Instr, ReadDa
 //       .ClkOut(ClkOut)
 //   );
    
-   //Two4DigitDisplay _Two4DigitDisplay(Clk,PCResult, WriteData
-  // Two4DigitDisplay _Two4DigitDisplay(Clk, ID_WriteData[15:0], WB_PCAddResult[15:0] - 4, out7, en_out);
+//      assign PCResult = WB_PCAddResult;       
+//    assign WriteData = WB_WBToWD
+//
+   Two4DigitDisplay _Two4DigitDisplay(Clk, WB_WBToWD[15:0], WB_PCAddResult[15:0] - 4, en_out, out7);
 
     //IF Wires
     wire [31:0] IF_PCInput;
