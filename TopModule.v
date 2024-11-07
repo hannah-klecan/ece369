@@ -1,29 +1,18 @@
 `timescale 1ns / 1ps
 
 ////////////////////////////////////////////////////////////////////////////////
-// Contribution
-// Hannah 50%
-// Seti 50%
-//
-// 5-stage pipelined MIPS processor implementation
-
-// Pipeline Registers
-//The design uses four pipeline registers to separate the stages:
-//- IF/ID Register: Stores fetched instruction and PC value
-//- ID/EX Register: Stores control signals, register values, sign-extended values
-//- EX/MEM Register: Stores ALU results, memory control signals, write register address
-//- MEM/WB Register: Stores results for writeback
 ////////////////////////////////////////////////////////////////////////////////
+module TopModule(Clk, Reset, PCResult, WriteData);
 
-module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALUControlOut); 
+//module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALUControlOut); 
 
    input Clk;
    input Reset;
-   output [7:0]en_out;
-   output [6:0]out7;
+//   output [7:0]en_out;
+//   output [6:0]out7;
    wire ClkOut = Clk;
-   wire [31:0] PCResult;       // Output for PC count
-   wire [31:0] WriteData;      // Output for write-back data
+   output [31:0] PCResult;       // Output for PC count
+   output [31:0] WriteData;      // Output for write-back data
     
 //   output [5:0] ShiftCheck;
 //   output [5:0] Instr;      
@@ -31,7 +20,7 @@ module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALU
 //   output [3:0] ALUControlOut;  
      
    
-   //ClkDiv _ClkDiv(Clk, Reset, ClkOut);
+//    ClkDiv _ClkDiv(Clk, Reset, ClkOut);
    // For simulation, use a smaller divider
 //   ClkDiv #(.DivVal(5)) _ClkDiv(  // Parameterize the divider value
 //       .Clk(Clk), 
@@ -39,10 +28,12 @@ module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALU
 //       .ClkOut(ClkOut)
 //   );
    
-//      assign PCResult = WB_PCAddResult;       
-//    assign WriteData = WB_WBToWD
+    assign PCResult = WB_PCAddResult;       
+    assign WriteData = ID_WriteData[15:0];
+//    assign PCResult = en_out;       
+//    assign WriteData = out7;
 //
-   Two4DigitDisplay _Two4DigitDisplay(Clk, WB_WBToWD[15:0], WB_PCAddResult[15:0] - 4, en_out, out7);
+//   Two4DigitDisplay _Two4DigitDisplay(Clk, WB_WBToWD[15:0], WB_PCAddResult[15:0] - 4, en_out, out7);
 
     //IF Wires
     wire [31:0] IF_PCInput;
@@ -127,11 +118,7 @@ module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALU
     wire [31:0] WB_MemReadData;
     wire [31:0] WB_WBToWD;
  
-    //  IF Stage
-    //- Uses Program Counter to fetch next instruction
-    //- PC Adder increments PC by 4
-    //- Multiplexer handles branch/jump target selection
-
+    // IF
     // ProgramCounter(Clk, Reset, input_address, output_address)
     ProgramCounter _PC(
         ClkOut, 
@@ -178,12 +165,7 @@ module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALU
         ID_PCOutput, 
         ID_PCAddResult);
 
-    //Instruction Decode Stage
-    // -Decodes instruction using the Controller
-    //- Reads register values
-    //- Sign extends immediate values
-    //- Generates all control signals
-    
+    //ID
     // Controller(Instruction, ShiftCheck, RegWrite, ALUSrc,
     //  ALUOp, RegDst, MemWrite, MemRead, MemtoReg, PCSrc, Jal, Branch, Shift)
     Controller _Controller(
@@ -200,6 +182,7 @@ module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALU
         ID_Jal, 
         ID_Branch, 
         ID_Shift);
+
         
     // Mux32bits2to1(inA, inB, Sel, Out)
     Mux32bits2to1 _JalMux(    // checked 
@@ -265,21 +248,16 @@ module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALU
         EX_PCAddResult,
         EX_Shift
     );
-    
-    //Execute Stage
-    //- ALU performs operations
-    //- Branch target address calculation
-    //- Jump target address calculation
-    //- Register write address selection
-    
+
     Srl _Shiftr( 
         EX_SEOutput, 
         EX_ShiftOutput);
         
     // Sll(in, out)
-    Sll _Shift( 
-        EX_SEOutput, 
-        EX_ShiftOutput);
+//    Sll _Shift( 
+//        EX_SEOutput, 
+//        EX_ShiftOutput);
+///
         
     // Adder(inA, inB, Out)
     Adder _BranchAdder(
@@ -339,11 +317,7 @@ module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALU
         EX_RegDst,
         EX_RegWriteAddress);
 
-    //MEM Stage
-    //- Memory access for loads/stores
-    //- Branch condition evaluation
-    //- PC source selection for branch/jumps
-    
+
     //EX/MEM Register
     // EX_MEMRegister(Clk, Reset, MemToReg_in, MemRead_in,
     // MemWrite_in, RegWrite_in, Jal_in, RegWriteAddress_in,
@@ -429,9 +403,7 @@ module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALU
         WB_MemReadData
     );
   
-    //Write Back
-    //- Selects write-back data (ALU result or memory data)
-    //- Writes result to register file
+    //WB
     // Mux32bits2to1(inA, inB, Sel, Out)
     Mux32bits2to1 _MemToRegMux( 
         WB_MemReadData, 
@@ -439,15 +411,10 @@ module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALU
         WB_MemToReg,
         WB_WBToWD);
 
-
-//    always @(posedge Clk) begin
-        
-//        en_out = WB_WBToWD;
-//        out 7= WB_PCAddResult;
-//    end
-    
-    assign PCResult = WB_PCAddResult;       
-    assign WriteData = WB_WBToWD;  
+//        assign out7 = WB_PCAddResult;       
+//        assign en_out = WB_WBToWD;  
+//      assign PCResult = WB_PCAddResult;       
+//      assign WriteData = WB_WBToWD;  
 //    assign ShiftCheck =  EX_Instruction26b[5:0];
 //    assign Instr = IF_Instruction[5:0];
 //    assign ReadData = ID_ReadData2; 
