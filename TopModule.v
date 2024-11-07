@@ -2,38 +2,20 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-module TopModule(Clk, Reset, PCResult, WriteData);
 
-//module TopModule(Clk, Reset, en_out, out7); //, ShiftCheck, Instr, ReadData, ALUControlOut); 
+module TopModule(Clk, Reset, PCResult, WriteData); 
 
    input Clk;
    input Reset;
-//   output [7:0]en_out;
-//   output [6:0]out7;
+//    output [7:0]en_out;
+//    output [6:0]out7;
    wire ClkOut = Clk;
    output [31:0] PCResult;       // Output for PC count
    output [31:0] WriteData;      // Output for write-back data
     
-//   output [5:0] ShiftCheck;
-//   output [5:0] Instr;      
-//   output [31:0] ReadData;   
-//   output [3:0] ALUControlOut;  
-     
-   
-//    ClkDiv _ClkDiv(Clk, Reset, ClkOut);
-   // For simulation, use a smaller divider
-//   ClkDiv #(.DivVal(5)) _ClkDiv(  // Parameterize the divider value
-//       .Clk(Clk), 
-//       .Rst(Reset), 
-//       .ClkOut(ClkOut)
-//   );
-   
-    assign PCResult = WB_PCAddResult;       
-    assign WriteData = ID_WriteData[15:0];
-//    assign PCResult = en_out;       
-//    assign WriteData = out7;
-//
-//   Two4DigitDisplay _Two4DigitDisplay(Clk, WB_WBToWD[15:0], WB_PCAddResult[15:0] - 4, en_out, out7);
+   // ClkDiv _ClkDiv(Clk, Reset, ClkOut);
+   //Two4DigitDisplay _Two4DigitDisplay(Clk,PCResult, WriteData
+  // Two4DigitDisplay _Two4DigitDisplay(Clk, ID_WriteData[15:0], WB_PCAddResult[15:0] - 4, out7, en_out);
 
     //IF Wires
     wire [31:0] IF_PCInput;
@@ -182,7 +164,6 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_Jal, 
         ID_Branch, 
         ID_Shift);
-
         
     // Mux32bits2to1(inA, inB, Sel, Out)
     Mux32bits2to1 _JalMux(    // checked 
@@ -224,7 +205,6 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_ReadData2,
         ID_SEOutput,
         ID_Instruction[25:0],
-        //ID_Instruction[31:0],
         ID_PCOutput,
         ID_Jal,
         ID_RegDst,
@@ -247,17 +227,14 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         EX_RegDst,
         EX_PCAddResult,
         EX_Shift
-    );
+);
 
-    Srl _Shiftr( 
+    //EX
+    
+    // Sll(in, out)
+    Sll _Shift( 
         EX_SEOutput, 
         EX_ShiftOutput);
-        
-    // Sll(in, out)
-//    Sll _Shift( 
-//        EX_SEOutput, 
-//        EX_ShiftOutput);
-///
         
     // Adder(inA, inB, Out)
     Adder _BranchAdder(
@@ -271,6 +248,12 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         EX_ReadData2, 
         EX_Shift,
         EX_ALUInput1);
+        
+    // Srl(in, out)
+    Srl _Shiftright (
+        EX_ALUInput1,
+        EX_AlUInput1 // shifted
+    );
         
     // Mux32bits2to1(inA, inB, Sel, Out)
     Mux32bits2to1 _ALUSrcMux( 
@@ -288,20 +271,11 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         EX_Zero);
     
     // ALUControl(ALUOp, Opcode, RT, Ctrl)
-//    ALUControl _ALUControl(
-//        EX_ALUOp, 
-//        EX_Instruction26b[5:0], 
-//        EX_Instruction26b[20:16], 
-//        EX_ALUControlOutput);
-     
-     //seems the input for sll srl is wrong 
-     ALUControl _ALUControl(
-        .ALUOp(EX_ALUOp),           // From ID/EX register
-        .Opcode(EX_Instruction26b[5:0]), // Should be function code for R-type
-        .RT(EX_Instruction26b[20:16]),
-        //.RT(EX_Instruction26b[10:6]),
-        .Ctrl(EX_ALUControlOutput)
-     );
+    ALUControl _ALUControl(
+        EX_ALUOp, 
+        EX_Instruction26b[5:0], 
+        EX_Instruction26b[20:16], 
+        EX_ALUControlOutput);
         
     // Jump(Immediate, PCOut, Address)
     Jump _Jump(
@@ -411,13 +385,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         WB_MemToReg,
         WB_WBToWD);
 
-//        assign out7 = WB_PCAddResult;       
-//        assign en_out = WB_WBToWD;  
-//      assign PCResult = WB_PCAddResult;       
-//      assign WriteData = WB_WBToWD;  
-//    assign ShiftCheck =  EX_Instruction26b[5:0];
-//    assign Instr = IF_Instruction[5:0];
-//    assign ReadData = ID_ReadData2; 
-//    assign ALUControlOut = EX_ALUControlOutput;
+    assign PCResult = WB_PCAddResult;       
+    assign WriteData = ID_WriteData;       
 
 endmodule
