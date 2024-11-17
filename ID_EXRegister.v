@@ -1,6 +1,11 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// Design Name: 
 // Module Name: ID_EXRegister
+// Project Name: 
+// Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -25,6 +30,7 @@ module ID_EXRegister (
     input [1:0]RegDst_in,
     input [31:0]PCAdderOut_in,
     input Shift_in,
+    input Stall_in,
 
     output reg [1:0] PCSrc_out,
     output reg MemToReg_out,
@@ -46,7 +52,7 @@ module ID_EXRegister (
 );
 
 always @(posedge Clk) begin
-    if (Reset) begin
+    if (Reset || Stall_in) begin
         PCSrc_out <= 0;
         MemToReg_out <= 0;
         MemRead_out <= 0;
@@ -86,4 +92,3 @@ always @(posedge Clk) begin
 end
 
 endmodule
-

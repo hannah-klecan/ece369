@@ -189,6 +189,21 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_Instruction[15:0], 
         ID_SEOutput);
 
+   // HazardDetection(ID_Rs, ID_Rt, ID_MemRead, EX_RegWrite,
+   // EX_RegDstSignal, EX_Rt, EX_Rd, MEM_RegWrite, MEM_RegDst, ID_Stall)
+   HazardDetectionUnit _HDU(
+        ID_Instruction[25:21],
+        ID_Instruction[20:16],
+        ID_MemRead,
+        EX_RegWrite,
+        EX_RegDst,
+        EX_Instruction26b[20:16],
+        EX_Instruction26b[15:11],
+        MEM_RegWrite,
+        MEM_RegWriteAddress,
+        ID_Stall
+    );
+
     //ID/EX Register
     ID_EXRegister ID_EXReg(
         ClkOut,
