@@ -8,10 +8,10 @@ module SignExtension(in, out);
     
     always @ (in)begin
         if(in[15])begin
-            out  <= {16'b1, in};
+            out  <= {16'hFFFF, in};     //KHS Changed to add FFFF to upper half instead of 0001
         end
         else begin
-            out <= {16'b0, in};
+            out <= {16'h0000, in};      //KHS Changed to use hex like above
         end
     end
 

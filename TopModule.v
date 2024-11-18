@@ -43,6 +43,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [31:0] ID_ReadData1;
     wire [31:0] ID_ReadData2;
     wire ID_Shift;
+    wire ID_Stall;
     
     //EX Wires
     wire [1:0] EX_PCSrc;
@@ -105,7 +106,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     ProgramCounter _PC(
         ClkOut, 
         Reset, 
-        IF_PCInput, 
+        IF_PCInput,
+        ID_Stall, 
         IF_PCOutput);
         
     // PCAdder(PCResult, PCAddResult)
@@ -142,7 +144,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         Reset, 
         IF_Instruction, 
         IF_PCOutput, 
-        IF_PCAddResult, 
+        IF_PCAddResult,
+        ID_Stall, 
         ID_Instruction,
         ID_PCOutput, 
         ID_PCAddResult);
@@ -225,6 +228,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_RegDst,
         ID_PCAddResult,
         ID_Shift,
+        ID_Stall,
         EX_PCSrc,
         EX_MemToReg,
         EX_MemRead,
@@ -258,17 +262,17 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         EX_BranchAdderOutput);
     
     // Mux32bits2to1(inA, inB, Sel, Out)
-    Mux32bits2to1 _ShiftMux( //  checked
-        EX_ReadData1, 
-        EX_ReadData2, 
-        EX_Shift,
-        EX_ALUInput1);
+//    Mux32bits2to1 _ShiftMux( //  checked           // Changed KHS Not needed
+//        EX_ReadData1, 
+//        EX_ReadData2, 
+//        EX_Shift,
+//        EX_ALUInput1);
         
     // Srl(in, out)
-    Srl _Shiftright (
-        EX_ALUInput1,
-        EX_AlUInput1 // shifted
-    );
+//    Srl _Shiftright (                     // Changed KHS Not needed
+//        EX_ALUInput1,
+//        EX_AlUInput1 // shifted
+//    );
         
     // Mux32bits2to1(inA, inB, Sel, Out)
     Mux32bits2to1 _ALUSrcMux( 
@@ -280,7 +284,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     // ALU(ALUControl, A, B, ALUResult, Zero)
     ALU _ALU(
         EX_ALUControlOutput, 
-        EX_ALUInput1, ///////
+        EX_ReadData1,                       // Changed KHS from EX_AlUInput1 as it should be taking straight from Reg file
         EX_ALUSrcOutput, 
         EX_ALUResult, 
         EX_Zero);

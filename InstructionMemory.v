@@ -34,7 +34,7 @@ module InstructionMemory(Address, Instruction);
 
     input [31:0] Address;             // Input Address 
     output reg [31:0] Instruction;    // Instruction at memory location Address
-    reg [31:0] memory [0:127];
+    reg [31:0] memory [0:295];
 
     
     initial begin                     // initialize memory

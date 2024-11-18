@@ -47,6 +47,9 @@ module ALUControl(ALUOp, Opcode, RT, Ctrl);
                     6'b000010: begin // srl
                         Ctrl = 4'b1000;
                     end
+                    6'b101010: begin // srl
+                        Ctrl = 4'b1000;
+                    end
                     6'b100100: begin // and
                         Ctrl = 4'b0011;
                     end
@@ -60,6 +63,9 @@ module ALUControl(ALUOp, Opcode, RT, Ctrl);
                         Ctrl = 4'b1001;
                     end
                     6'b000000: begin //sll
+                        Ctrl = 4'b0111;
+                    end
+                    6'b111100: begin //sll
                         Ctrl = 4'b0111;
                     end
                     default: begin

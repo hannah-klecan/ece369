@@ -161,7 +161,7 @@ always @(Instruction, ShiftCheck) begin
         Shift <= 0;
     end        
     
-    6'b000001: begin //branch if greater than or equal to zero (bgez)
+    6'b000001: begin //BGEZ and BLTZ
         RegWrite <= 0;
         ALUSrc <= 0;
         RegDst <= 2'b00;
@@ -231,19 +231,19 @@ always @(Instruction, ShiftCheck) begin
         Shift <= 0;
     end        
     
-    6'b000001: begin //branch if less than zero (bltz)
-        RegWrite <= 0;
-        ALUSrc <= 0;
-        RegDst <= 2'b00;
-        Branch <= 1;
-        MemWrite <= 0;
-        MemRead <= 0;
-        MemtoReg <= 1;
-        PCSrc <= 2'b00;
-        ALUOp <= 9;
-        Jal <= 0;
-        Shift <= 0;
-    end
+//    6'b000001: begin //branch if less than zero (bltz)    //KHS Changed. Unneeded as same case and content as BGEZ
+//        RegWrite <= 0;
+//        ALUSrc <= 0;
+//        RegDst <= 2'b00;
+//        Branch <= 1;
+//        MemWrite <= 0;
+//        MemRead <= 0;
+//        MemtoReg <= 1;
+//        PCSrc <= 2'b00;
+//        ALUOp <= 9;
+//        Jal <= 0;
+//        Shift <= 0;
+//    end
     
     6'b000010: begin //jump (j)
         RegWrite <= 0;
