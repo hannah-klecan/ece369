@@ -1,6 +1,11 @@
 `timescale 1ns / 1ps
 
 ////////////////////////////////////////////////////////////////////////////////
+// Team Members:
+// Seti 50%
+// Hannah 50%
+// 
+// ECE369A - Computer Architecture
 ////////////////////////////////////////////////////////////////////////////////
 
 module TopModule(Clk, Reset, PCResult, WriteData); 
@@ -43,6 +48,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [31:0] ID_ReadData1;
     wire [31:0] ID_ReadData2;
     wire ID_Shift;
+    wire ID_Stall;
     
     //EX Wires
     wire [1:0] EX_PCSrc;
@@ -56,7 +62,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [31:0] EX_ReadData1;
     wire [31:0] EX_ReadData2;
     wire [31:0] EX_SEOutput;
-    wire [31:0] EX_Instruction26b;
+    wire [25:0] EX_Instruction26b;
     wire [31:0] EX_PCOutput;
     wire EX_Jal;
     wire [1:0] EX_RegDst;
@@ -105,7 +111,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     ProgramCounter _PC(
         ClkOut, 
         Reset, 
-        IF_PCInput, 
+        IF_PCInput,
+        ID_Stall, 
         IF_PCOutput);
         
     // PCAdder(PCResult, PCAddResult)
@@ -142,7 +149,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         Reset, 
         IF_Instruction, 
         IF_PCOutput, 
-        IF_PCAddResult, 
+        IF_PCAddResult,
+        ID_Stall, 
         ID_Instruction,
         ID_PCOutput, 
         ID_PCAddResult);
@@ -189,6 +197,21 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_Instruction[15:0], 
         ID_SEOutput);
 
+   // HazardDetection(ID_Rs, ID_Rt, ID_MemRead, EX_RegWrite,
+   // EX_RegDstSignal, EX_Rt, EX_Rd, MEM_RegWrite, MEM_RegDst, ID_Stall)
+   HazardDetectionUnit _HDU(
+        ID_Instruction[25:21],
+        ID_Instruction[20:16],
+        ID_MemRead,
+        EX_RegWrite,
+        EX_RegDst,
+        EX_Instruction26b[20:16],
+        EX_Instruction26b[15:11],
+        MEM_RegWrite,
+        MEM_RegWriteAddress,
+        ID_Stall
+    );
+
     //ID/EX Register
     ID_EXRegister ID_EXReg(
         ClkOut,
@@ -210,6 +233,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_RegDst,
         ID_PCAddResult,
         ID_Shift,
+        ID_Stall,
         EX_PCSrc,
         EX_MemToReg,
         EX_MemRead,
@@ -243,17 +267,17 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         EX_BranchAdderOutput);
     
     // Mux32bits2to1(inA, inB, Sel, Out)
-    Mux32bits2to1 _ShiftMux( //  checked
-        EX_ReadData1, 
-        EX_ReadData2, 
-        EX_Shift,
-        EX_ALUInput1);
+//    Mux32bits2to1 _ShiftMux( //  checked           // Changed Not needed
+//        EX_ReadData1, 
+//        EX_ReadData2, 
+//        EX_Shift,
+//        EX_ALUInput1);
         
     // Srl(in, out)
-    Srl _Shiftright (
-        EX_ALUInput1,
-        EX_AlUInput1 // shifted
-    );
+//    Srl _Shiftright (                     // Changed Not needed
+//        EX_ALUInput1,
+//        EX_AlUInput1 // shifted
+//    );
         
     // Mux32bits2to1(inA, inB, Sel, Out)
     Mux32bits2to1 _ALUSrcMux( 
@@ -265,7 +289,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     // ALU(ALUControl, A, B, ALUResult, Zero)
     ALU _ALU(
         EX_ALUControlOutput, 
-        EX_ALUInput1, ///////
+        EX_ReadData1,                       // Changed from EX_AlUInput1 as it should be taking straight from Reg file
         EX_ALUSrcOutput, 
         EX_ALUResult, 
         EX_Zero);

@@ -1,5 +1,11 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
+// The University of Arizona
+// Electrical and Computer Engineering 
+// Engineer: Ehsan Esmaili, Elnaz T. Yazdi
+// 
+// Create Date: 09/22/2016
+// Last Revision: 8/19/2018
 // Module Name: Two4DigitDisplay
 // Description: To display a 32 bit input on 4 hexadecimal digits
 //              pass the 16 least significant bits to "NumberA" and
@@ -114,4 +120,3 @@ module Two4DigitDisplay(Clk, NumberA, NumberB, out7, en_out);
      
     
 endmodule
-

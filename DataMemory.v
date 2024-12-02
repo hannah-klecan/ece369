@@ -17,7 +17,7 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData);
 	   $readmemh("data_memory.mem", memory);
 	end
 	
-	always @(posedge Clk) begin
+	always @(negedge Clk) begin
         if (MemWrite == 1) begin // sw
             memory[Address[9:2]] <= WriteData;
         end 

@@ -15,7 +15,7 @@ module TopModule_tb();
 //    wire [3:0] ALUControlOut; 
 
 //    TopModule _top(Clk, Reset, PCResult, WriteData); 
-    
+    // en_out, out7)
     TopModule test1(
         .Clk(Clk), .Reset(Reset), .PCResult(PCResult) , .WriteData(WriteData) );
 //       , .ShiftCheck(ShiftCheck), .Instr(Instr), .ReadData(ReadData), . ALUControlOut(ALUControlOut));

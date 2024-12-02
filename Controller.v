@@ -1,25 +1,30 @@
 `timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Module Name: Controller
+// Comments:
+// Generates the control signals to coordinate how data flows through the processors
+// datapath based on the current instruction being executed. 
+//////////////////////////////////////////////////////////////////////////////////
 
 
 module Controller(Instruction, ShiftCheck, RegWrite, ALUSrc, ALUOp, RegDst, MemWrite, MemRead, MemtoReg, PCSrc, Jal, Branch, Shift);
 
+// 6-bit inputs for opcode and function fields
 input [5:0] Instruction, ShiftCheck;
-  
 
+// Output port declarations 
 output reg [1:0] RegWrite, MemWrite, MemRead; 
-
 output reg [1:0] RegDst;
-
 output reg ALUSrc, MemtoReg, Jal, Branch, Shift;
-
 output reg [2:0] PCSrc;
-
 output reg [3:0] ALUOp;
   
-
+// Behavioral block triggered by changes to Instruction or ShiftCheck
 always @(Instruction, ShiftCheck) begin
 
+    // Case statement based on opcode
     case(Instruction)
+    // Each case represents an instruction type
     6'b000000: begin //r-type w/o immediate (add, sub)
         RegWrite <= 1;
         ALUOp <= 0;
@@ -34,6 +39,11 @@ always @(Instruction, ShiftCheck) begin
         if(ShiftCheck == 0 || ShiftCheck == 6'd2)begin
             ALUSrc <= 1;
             Shift <= 1;
+            if(ShiftCheck == 6'd2) begin  // SRL specific case
+                ALUOp <= 8;  // Set to 8 to match ALU's SRL control value
+            end else begin  // SLL case
+                ALUOp <= 7;  // ALU uses 7 for SLL
+            end
          end
          else if(ShiftCheck == 8)begin // jr : 001000
             RegWrite <= 0;
@@ -151,7 +161,7 @@ always @(Instruction, ShiftCheck) begin
         Shift <= 0;
     end        
     
-    6'b000001: begin //branch if greater than or equal to zero (bgez)
+    6'b000001: begin //BGEZ and BLTZ
         RegWrite <= 0;
         ALUSrc <= 0;
         RegDst <= 2'b00;
@@ -221,19 +231,19 @@ always @(Instruction, ShiftCheck) begin
         Shift <= 0;
     end        
     
-    6'b000001: begin //branch if less than zero (bltz)
-        RegWrite <= 0;
-        ALUSrc <= 0;
-        RegDst <= 2'b00;
-        Branch <= 1;
-        MemWrite <= 0;
-        MemRead <= 0;
-        MemtoReg <= 1;
-        PCSrc <= 2'b00;
-        ALUOp <= 9;
-        Jal <= 0;
-        Shift <= 0;
-    end
+//    6'b000001: begin //branch if less than zero (bltz)    //KHS Changed. Unneeded as same case and content as BGEZ
+//        RegWrite <= 0;
+//        ALUSrc <= 0;
+//        RegDst <= 2'b00;
+//        Branch <= 1;
+//        MemWrite <= 0;
+//        MemRead <= 0;
+//        MemtoReg <= 1;
+//        PCSrc <= 2'b00;
+//        ALUOp <= 9;
+//        Jal <= 0;
+//        Shift <= 0;
+//    end
     
     6'b000010: begin //jump (j)
         RegWrite <= 0;

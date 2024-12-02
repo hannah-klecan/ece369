@@ -1,6 +1,10 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
 // Module Name: RegisterFile
+// Project Name: 
+// Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +58,7 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
         registers[31] <= 32'd0;
 	end
 	
-	always @(posedge Clk)begin
+	always @(negedge Clk)begin
 	   if(RegWrite == 1)begin  //Regular Write 32'b
 	       registers[WriteRegister] <= WriteData;
 	   end
