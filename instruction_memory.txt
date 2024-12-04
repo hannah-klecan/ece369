@@ -1,0 +1,81 @@
+23bdfffc	//	main:		addi	$sp, $sp, -4
+afbf0000	//			sw	$ra, 0($sp)
+34040060	//			ori	$a0, $zero, 96
+34050070	//			ori	$a1, $zero, 112
+3406314c	//			ori	$a2, $zero, 12620
+00000000	//			nop
+0c000041	//			jal	print_result
+3404354c	//			ori	$a0, $zero, 13644
+3405355c	//			ori	$a1, $zero, 13660
+34066638	//			ori	$a2, $zero, 26168
+00000000	//			nop
+0c000041	//			jal	print_result
+34046a38	//			ori	$a0, $zero, 27192
+34056a48	//			ori	$a1, $zero, 27208
+34069b24	//			ori	$a2, $zero, 39716
+00000000	//			nop
+0c000041	//			jal	print_result
+34049f24	//			ori	$a0, $zero, 40740
+34059f34	//			ori	$a1, $zero, 40756
+3406d010	//			ori	$a2, $zero, 53264
+00000000	//			nop
+0c000041	//			jal	print_result
+3404d410	//			ori	$a0, $zero, 54288
+3405d420	//			ori	$a1, $zero, 54304
+340604fc	//			ori	$a2, $zero, 66812
+00000000	//			nop
+0c000041	//			jal	print_result
+340408fc	//			ori	$a0, $zero, 67836
+3405090c	//			ori	$a1, $zero, 67852
+340617cc	//			ori	$a2, $zero, 71628
+00000000	//			nop
+0c000041	//			jal	print_result
+34041bcc	//			ori	$a0, $zero, 72652
+34051bdc	//			ori	$a1, $zero, 72668
+3406291c	//			ori	$a2, $zero, 76060
+00000000	//			nop
+0c000041	//			jal	print_result
+34042d1c	//			ori	$a0, $zero, 77084
+34052d2c	//			ori	$a1, $zero, 77100
+3406312c	//			ori	$a2, $zero, 78124
+00000000	//			nop
+0c000041	//			jal	print_result
+3404352c	//			ori	$a0, $zero, 79148
+3405353c	//			ori	$a1, $zero, 79164
+3406393c	//			ori	$a2, $zero, 80188
+00000000	//			nop
+0c000041	//			jal	print_result
+340439bc	//			ori	$a0, $zero, 80316
+340539cc	//			ori	$a1, $zero, 80332
+34063dcc	//			ori	$a2, $zero, 81356
+00000000	//			nop
+0c000041	//			jal	print_result
+34043e4c	//			ori	$a0, $zero, 81484
+34053e5c	//			ori	$a1, $zero, 81500
+3406425c	//			ori	$a2, $zero, 82524
+00000000	//			nop
+0c000041	//			jal	print_result
+3404429c	//			ori	$a0, $zero, 82588
+340542ac	//			ori	$a1, $zero, 82604
+340652ac	//			ori	$a2, $zero, 86700
+00000000	//			nop
+0c000041	//			jal	print_result
+8fbf0000	//			lw	$ra, 0($sp)
+23bd0004	//			addi	$sp, $sp, 4
+03e00008	//			jr	$ra
+00402020	//	print_result:	add	$a0, $v0, $zero
+34020001	//			ori	$v0, $zero, 1
+00000000	//			nop
+340454ac	//			ori	$a0, $zero, 87212
+34020004	//			ori	$v0, $zero, 4
+00000000	//			nop
+00602020	//			add	$a0, $v1, $zero
+34020001	//			ori	$v0, $zero, 1
+00000000	//			nop
+340454ac	//			ori	$a0, $zero, 87212
+34020004	//			ori	$v0, $zero, 4
+00000000	//			nop
+340454ac	//			ori	$a0, $zero, 87212
+34020004	//			ori	$v0, $zero, 4
+00000000	//			nop
+03e00008	//			jr	$ra
