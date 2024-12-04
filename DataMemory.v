@@ -14,7 +14,7 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData);
     integer i;
 	
 	initial begin
-	   $readmemh("data_memory.mem", memory);
+	   $readmemh("private_data_memory_lab6.mem", memory);
 	end
 	
 	always @(negedge Clk) begin

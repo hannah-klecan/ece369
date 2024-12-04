@@ -49,6 +49,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [31:0] ID_ReadData2;
     wire ID_Shift;
     wire ID_Stall;
+    wire Flush_IF_ID;
     
     //EX Wires
     wire [1:0] EX_PCSrc;
@@ -150,7 +151,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         IF_Instruction, 
         IF_PCOutput, 
         IF_PCAddResult,
-        ID_Stall, 
+        ID_Stall,
+        Flush_IF_ID, 
         ID_Instruction,
         ID_PCOutput, 
         ID_PCAddResult);
@@ -199,18 +201,35 @@ module TopModule(Clk, Reset, PCResult, WriteData);
 
    // HazardDetection(ID_Rs, ID_Rt, ID_MemRead, EX_RegWrite,
    // EX_RegDstSignal, EX_Rt, EX_Rd, MEM_RegWrite, MEM_RegDst, ID_Stall)
-   HazardDetectionUnit _HDU(
-        ID_Instruction[25:21],
-        ID_Instruction[20:16],
-        ID_MemRead,
-        EX_RegWrite,
-        EX_RegDst,
-        EX_Instruction26b[20:16],
-        EX_Instruction26b[15:11],
-        MEM_RegWrite,
-        MEM_RegWriteAddress,
-        ID_Stall
-    );
+//   HazardDetectionUnit _HDU(
+//        ID_Instruction[25:21],
+//        ID_Instruction[20:16],
+//        ID_MemRead,
+//        EX_RegWrite,
+//        EX_RegDst,
+//        EX_Instruction26b[20:16],
+//        EX_Instruction26b[15:11],
+//        MEM_RegWrite,
+//        MEM_RegWriteAddress,
+//        ID_Stall
+//    );
+
+    HazardDetectionUnit _HDU(
+            ClkOut,
+            Reset,
+            ID_Instruction[25:21],
+            ID_Instruction[20:16],
+            ID_MemRead,
+            EX_MemRead,
+            EX_RegWrite,
+            MEM_RegWrite,
+            EX_RegDst,
+            EX_Instruction26b[20:16],
+            EX_Instruction26b[15:11],
+            MEM_RegWriteAddress,
+            ID_Stall,
+            Flush_IF_ID
+        );
 
     //ID/EX Register
     ID_EXRegister ID_EXReg(
