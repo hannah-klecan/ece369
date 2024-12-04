@@ -31,11 +31,11 @@ always @(posedge Clk) begin
         PCOutput_out <= 0;
         PCAdderOut_out <= 0;
     end
-    else if (Flush_IF_ID == 1) begin
-        Instruction_out <= 0;
-        PCOutput_out <= 0;
-        PCAdderOut_out <= 0;
-    end 
+//    else if (Flush_IF_ID == 1) begin
+//        Instruction_out <= 0;
+//        PCOutput_out <= 0;
+//        PCAdderOut_out <= 0;
+//    end 
     else begin
         if (Stall_in == 0) begin
             Instruction_out <= Instruction_in;
