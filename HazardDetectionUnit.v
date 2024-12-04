@@ -51,23 +51,29 @@ module HazardDetectionUnit (
     end
 
     // Sequential logic for multi-cycle stall and flush control
-    always @(posedge Clk or posedge Reset) begin
+    always @(EXStall, MEMStall) begin
+            // If a hazard is detected, start a multi-cycle stall
+            if (EXStall || MEMStall) begin
+                StallCounter <= 2; // Two-cycle stall for load-use hazard
+                ID_Stall <= 1;
+                Flush_IF_ID <= 1; // Flush IF/ID
+            end 
+    end
+    
+    always @(posedge Clk, posedge Reset) begin
         if (Reset) begin
             ID_Stall     <= 0;
             Flush_IF_ID  <= 0;
             StallCounter <= 0;
-        end else begin
-            // If a hazard is detected, start a multi-cycle stall
-            if (EXStall) begin
-                StallCounter <= 2; // Two-cycle stall for load-use hazard
-                ID_Stall <= 1;
-                Flush_IF_ID <= 1; // Flush IF/ID
-            end else if (StallCounter > 0) begin
+        end 
+        else begin
+            if (StallCounter > 0) begin
                 // Decrement stall counter during multi-cycle stalls
                 StallCounter <= StallCounter - 1;
                 ID_Stall <= 1;
                 Flush_IF_ID <= 1; // Continue flushing during stall
-            end else begin
+            end 
+            else begin
                 // Clear stall and flush signals when the stall counter reaches 0
                 ID_Stall <= 0;
                 Flush_IF_ID <= 0;
