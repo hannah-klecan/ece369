@@ -12,11 +12,13 @@ module HazardDetectionUnit (
     input        EX_RegWrite,
     input        MEM_RegWrite,
     input [1:0]  EX_RegDstSignal,
+    input [4:0]  EX_Rs,
     input [4:0]  EX_Rt,
     input [4:0]  EX_Rd,
     input [4:0]  MEM_RegDst,
     output reg   ID_Stall,
-    output reg   Flush_IF_ID
+    output reg   Flush_IF_ID,
+    output reg   Forward_ALU
 );
 
     reg EXStall, MEMStall, BranchStall;
@@ -30,6 +32,7 @@ module HazardDetectionUnit (
         BranchStall  <= 0;
         Flush_IF_ID  <= 0;
         StallCounter <= 0;
+        Forward_ALU  <= 0;
     end
 
     // Detect hazards (combinational logic)
@@ -37,6 +40,7 @@ module HazardDetectionUnit (
         EXStall = 0;
         MEMStall = 0;
         BranchStall = 0;
+        Forward_ALU  = 0;
     
         if (ID_Branch) begin
             BranchStall = 1;
@@ -51,8 +55,9 @@ module HazardDetectionUnit (
 
         // Detect MEM to ID hazards
         if (MEM_RegWrite) begin
-            if ((MEM_RegDst == ID_Rs || MEM_RegDst == ID_Rt) && (MEM_RegDst != 0)) begin
+            if ((MEM_RegDst == ID_Rs || MEM_RegDst == ID_Rt || MEM_RegDst == EX_Rs) && (MEM_RegDst != 0)) begin
                 MEMStall = 1;
+                Forward_ALU = 1;
             end
         end
     end

@@ -50,8 +50,10 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire ID_Shift;
     wire ID_Stall;
     wire Flush_IF_ID;
+    wire ForwardALU;
     
     //EX Wires
+    wire [4:0] EX_Rs;
     wire [1:0] EX_PCSrc;
     wire EX_MemToReg;
     wire [1:0] EX_MemRead;
@@ -225,11 +227,13 @@ module TopModule(Clk, Reset, PCResult, WriteData);
             EX_RegWrite,
             MEM_RegWrite,
             EX_RegDst,
+            EX_Rs,
             EX_Instruction26b[20:16],
             EX_Instruction26b[15:11],
             MEM_RegWriteAddress,
             ID_Stall,
-            Flush_IF_ID
+            Flush_IF_ID,
+            ForwardALU
         );
 
     //ID/EX Register
@@ -247,6 +251,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_ReadData1,
         ID_ReadData2,
         ID_SEOutput,
+        ID_Instruction[25:21],
         ID_Instruction[25:0],
         ID_PCOutput,
         ID_Jal,
@@ -265,6 +270,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         EX_ReadData1,
         EX_ReadData2,
         EX_SEOutput,
+        EX_Rs,
         EX_Instruction26b,
         EX_PCOutput,
         EX_Jal,
@@ -298,7 +304,16 @@ module TopModule(Clk, Reset, PCResult, WriteData);
 //        EX_ALUInput1,
 //        EX_AlUInput1 // shifted
 //    );
+
+
         
+    // Mux32bits2to1(inA, inB, Sel, Out)
+//    Mux32bits2to1 _ALUSrcMux1( 
+//        EX_ReadData1, 
+//        MEM_ALUResult, 
+//        ForwardALU,
+//        EX_ALUSrcOutput1);
+
     // Mux32bits2to1(inA, inB, Sel, Out)
     Mux32bits2to1 _ALUSrcMux( 
         EX_ReadData2, 

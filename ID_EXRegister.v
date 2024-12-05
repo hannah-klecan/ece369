@@ -24,6 +24,7 @@ module ID_EXRegister (
     input [31:0]ReadData1_in,
     input [31:0]ReadData2_in,
     input [31:0]ExtendedImmediate_in,
+    input [4:0] ID_Rs,
     input [25:0]Address_in,
     input [31:0]PCOutput_in,
     input Jal_in,
@@ -43,6 +44,7 @@ module ID_EXRegister (
     output reg [31:0]ReadData1_out,
     output reg [31:0]ReadData2_out,
     output reg [31:0]ExtendedImmediate_out,
+    output reg [4:0] EX_Rs,
     output reg [25:0]Address_out,
     output reg [31:0]PCOutput_out,
     output reg Jal_out,
@@ -64,6 +66,7 @@ always @(posedge Clk) begin
         ReadData1_out <= 0;
         ReadData2_out <= 0;
         ExtendedImmediate_out <= 0;
+        EX_Rs <= 0;
         Address_out <= 0;
         PCOutput_out <= 0;
         Jal_out <= 0;
@@ -82,6 +85,7 @@ always @(posedge Clk) begin
         ReadData1_out <= ReadData1_in;
         ReadData2_out <= ReadData2_in;
         ExtendedImmediate_out <= ExtendedImmediate_in;
+        EX_Rs <= ID_Rs;
         Address_out <= Address_in;
         PCOutput_out <= PCOutput_in;
         Jal_out <= Jal_in;
