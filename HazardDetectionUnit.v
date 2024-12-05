@@ -6,6 +6,7 @@ module HazardDetectionUnit (
     input        Reset,
     input [4:0]  ID_Rs,
     input [4:0]  ID_Rt,
+    input        ID_Branch,
     input        ID_MemRead,
     input        EX_MemRead,
     input        EX_RegWrite,
@@ -18,7 +19,7 @@ module HazardDetectionUnit (
     output reg   Flush_IF_ID
 );
 
-    reg EXStall, MEMStall;
+    reg EXStall, MEMStall, BranchStall;
     reg [1:0] StallCounter; // Counter for multi-cycle stalls
 
     // Initialize all relevant signals
@@ -26,6 +27,7 @@ module HazardDetectionUnit (
         ID_Stall     <= 0;
         EXStall      <= 0;
         MEMStall     <= 0;
+        BranchStall  <= 0;
         Flush_IF_ID  <= 0;
         StallCounter <= 0;
     end
@@ -34,6 +36,11 @@ module HazardDetectionUnit (
     always @(*) begin
         EXStall = 0;
         MEMStall = 0;
+        BranchStall = 0;
+    
+        if (ID_Branch) begin
+            BranchStall = 1;
+        end
 
         // Detect EX to ID hazards
         if (EX_MemRead) begin
@@ -51,13 +58,16 @@ module HazardDetectionUnit (
     end
 
     // Sequential logic for multi-cycle stall and flush control
-    always @(EXStall, MEMStall) begin
+    always @(EXStall, MEMStall, BranchStall) begin
             // If a hazard is detected, start a multi-cycle stall
-            if (EXStall || MEMStall) begin
+            if (EXStall || MEMStall || BranchStall) begin
                 StallCounter <= 2; // Two-cycle stall for load-use hazard
                 ID_Stall <= 1;
                 Flush_IF_ID <= 1; // Flush IF/ID
             end 
+//            if(BranchStall) begin
+//                ID_Stall <= 1;
+//            end
     end
     
     always @(posedge Clk, posedge Reset) begin

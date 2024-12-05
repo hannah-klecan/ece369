@@ -219,6 +219,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
             Reset,
             ID_Instruction[25:21],
             ID_Instruction[20:16],
+            ID_Branch,
             ID_MemRead,
             EX_MemRead,
             EX_RegWrite,

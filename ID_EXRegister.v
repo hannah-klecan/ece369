@@ -52,7 +52,7 @@ module ID_EXRegister (
 );
 
 always @(posedge Clk) begin
-    if (Reset || Stall_in) begin
+    if (Reset || (Stall_in && !Branch_in)) begin
         PCSrc_out <= 0;
         MemToReg_out <= 0;
         MemRead_out <= 0;
