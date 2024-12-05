@@ -10,6 +10,7 @@ module HazardDetectionUnit (
     input        EX_MemRead,
     input        EX_RegWrite,
     input        MEM_RegWrite,
+    input        MEM_ZeroANDBranch,
     input [1:0]  EX_RegDstSignal,
     input [4:0]  EX_Rt,
     input [4:0]  EX_Rd,
@@ -56,7 +57,9 @@ module HazardDetectionUnit (
             if (EXStall || MEMStall) begin
                 StallCounter <= 2; // Two-cycle stall for load-use hazard
                 ID_Stall <= 1;
-                Flush_IF_ID <= 1; // Flush IF/ID
+                if (MEM_ZeroANDBranch == 1) begin
+                    Flush_IF_ID <= 1; // Flush IF/ID
+                end
             end 
     end
     

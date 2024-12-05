@@ -223,6 +223,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
             EX_MemRead,
             EX_RegWrite,
             MEM_RegWrite,
+            MEM_ZeroANDBranch,
             EX_RegDst,
             EX_Instruction26b[20:16],
             EX_Instruction26b[15:11],
