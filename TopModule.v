@@ -80,6 +80,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [4:0] EX_RegWriteAddress;
     wire EX_Shift;
     wire [31:0] EX_ALUInput1;
+    wire [1:0] ForwardA;           // Forwarding control signal for ALU input A
+    wire [1:0] ForwardB;           // Forwarding control signal for ALU input B
     
     //MEM Wires
     wire MEM_MemToReg;
@@ -108,6 +110,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [31:0] WB_PCAddResult;
     wire [31:0] WB_MemReadData;
     wire [31:0] WB_WBToWD;
+    
+   
  
     // IF
     // ProgramCounter(Clk, Reset, input_address, output_address)
@@ -314,18 +318,44 @@ module TopModule(Clk, Reset, PCResult, WriteData);
 //        ForwardALU,
 //        EX_ALUSrcOutput1);
 
-    // Mux32bits2to1(inA, inB, Sel, Out)
-    Mux32bits2to1 _ALUSrcMux( 
-        EX_ReadData2, 
-        EX_SEOutput, 
-        EX_ALUSrc,
-        EX_ALUSrcOutput);
+//    // Mux32bits2to1(inA, inB, Sel, Out)
+//    Mux32bits2to1 _ALUSrcMux( 
+//        EX_ReadData2, 
+//        EX_SEOutput, 
+//        EX_ALUSrc,
+//        EX_ALUSrcOutput);
+
+    // Forwarding Unit instantiation
+    ForwardingUnit _ForwardingUnit (
+        EX_Rs,
+        EX_Rt,
+        MEM_RegWriteAddress,
+        WB_RegWriteAddress,
+        MEM_RegWrite,
+        WB_RegWrite,
+        ForwardA,
+        ForwardB);
+        
+    // Mux5bits3to1(inA, inB, inC, Sel, Out)
+    Mux5bits3to1 _ForwardingMuxA(
+       EX_ReadData1,
+       MEM_ALUResult,
+       WB_WBToWD,
+       ForwardA,
+       EX_ALUInput1);
+        
+    Mux5bits3to1 _ForwardingMuxB(
+        EX_ReadData2,
+        MEM_ALUResult,
+        WB_WBToWD,
+        ForwardB,
+        EX_ALUInput2);
         
     // ALU(ALUControl, A, B, ALUResult, Zero)
     ALU _ALU(
         EX_ALUControlOutput, 
-        EX_ReadData1,                       // Changed from EX_AlUInput1 as it should be taking straight from Reg file
-        EX_ALUSrcOutput, 
+        EX_ALUInput1,                       // Changed from EX_AlUInput1 as it should be taking straight from Reg file
+        EX_ALUInput2, 
         EX_ALUResult, 
         EX_Zero);
     
