@@ -7,7 +7,7 @@ module ForwardingMuxA(
     output reg [31:0] ALUInputA    // ALU input A
 );
 
-    always @(*) begin
+    always @(ForwardA, ALUInputA, EX_ReadData1, MEM_ALUResult, WB_WBToWD, ALUControl) begin
         case (ForwardA)
             2'b00: ALUInputA = EX_ReadData1;  // No forwarding
             2'b10: ALUInputA = MEM_ALUResult; // Forward from MEM stage

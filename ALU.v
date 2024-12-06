@@ -16,7 +16,7 @@ module ALU(ALUControl, A, B, ALUResult, Zero);
 	output reg [31:0] ALUResult;
 	output reg Zero;	    // Zero=1 if ALUResult == 0
 
-    always @(A,B, ALUControl)begin
+    always @(A,B)begin
         //add
         if(ALUControl == 0)begin
             ALUResult <= A + B;
