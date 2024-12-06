@@ -50,7 +50,6 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire ID_Shift;
     wire ID_Stall;
     wire Flush_IF_ID;
-    wire ForwardALU;
     
     //EX Wires
     wire [4:0] EX_Rs;
@@ -80,8 +79,9 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [4:0] EX_RegWriteAddress;
     wire EX_Shift;
     wire [31:0] EX_ALUInput1;
+    wire [31:0] EX_ALUInput2;
     wire [1:0] ForwardA;           // Forwarding control signal for ALU input A
-    wire [1:0] ForwardB;           // Forwarding control signal for ALU input B
+    wire ForwardB;                 // Forwarding control signal for ALU input B
     
     //MEM Wires
     wire MEM_MemToReg;
@@ -236,8 +236,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
             EX_Instruction26b[15:11],
             MEM_RegWriteAddress,
             ID_Stall,
-            Flush_IF_ID,
-            ForwardALU
+            Flush_IF_ID
         );
 
     //ID/EX Register
@@ -309,15 +308,6 @@ module TopModule(Clk, Reset, PCResult, WriteData);
 //        EX_AlUInput1 // shifted
 //    );
 
-
-        
-    // Mux32bits2to1(inA, inB, Sel, Out)
-//    Mux32bits2to1 _ALUSrcMux1( 
-//        EX_ReadData1, 
-//        MEM_ALUResult, 
-//        ForwardALU,
-//        EX_ALUSrcOutput1);
-
 //    // Mux32bits2to1(inA, inB, Sel, Out)
 //    Mux32bits2to1 _ALUSrcMux( 
 //        EX_ReadData2, 
@@ -337,18 +327,21 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ForwardB);
         
     // Mux5bits3to1(inA, inB, inC, Sel, Out)
-    Mux5bits3to1 _ForwardingMuxA(
+    ForwardingMuxA _ForwardingMuxA(
        EX_ReadData1,
        MEM_ALUResult,
        WB_WBToWD,
        ForwardA,
+       EX_ALUControlOutput,
        EX_ALUInput1);
         
-    Mux5bits3to1 _ForwardingMuxB(
+
+    ForwardingMuxB _ForwardingMuxB(
         EX_ReadData2,
+        EX_SEOutput,
         MEM_ALUResult,
-        WB_WBToWD,
-        ForwardB,
+        {ForwardB, EX_ALUSrc},
+        EX_ALUControlOutput,
         EX_ALUInput2);
         
     // ALU(ALUControl, A, B, ALUResult, Zero)
