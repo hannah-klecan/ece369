@@ -318,7 +318,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     // Forwarding Unit instantiation
     ForwardingUnit _ForwardingUnit (
         EX_Rs,
-        EX_Rt,
+        EX_Instruction26b[20:16],
         MEM_RegWriteAddress,
         WB_RegWriteAddress,
         MEM_RegWrite,
