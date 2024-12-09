@@ -38,7 +38,7 @@ module InstructionMemory(Address, Instruction);
 
     
     initial begin                     // initialize memory
-        $readmemh("private_instruction_memory_lab6.mem", memory);
+        $readmemh("instruction_mem.mem", memory);
      end
      
   always @(Address) begin
