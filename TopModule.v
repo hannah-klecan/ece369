@@ -50,6 +50,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire ID_Shift;
     wire ID_Stall;
     wire Flush_IF_ID;
+    wire ID_Jump;
     
     //EX Wires
     wire [4:0] EX_Rs;
@@ -180,7 +181,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_PCSrc, 
         ID_Jal, 
         ID_Branch, 
-        ID_Shift);
+        ID_Shift,
+        ID_Jump);
         
     // Mux32bits2to1(inA, inB, Sel, Out)
     Mux32bits2to1 _JalMux(    // checked 
@@ -238,6 +240,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
             EX_Instruction26b[15:11],
             MEM_RegWriteAddress,
             ForwardA,
+            ID_Jump,
             ID_Stall,
             Flush_IF_ID
         );
@@ -265,6 +268,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_PCAddResult,
         ID_Shift,
         ID_Stall,
+        ID_Jump,
         EX_PCSrc,
         EX_MemToReg,
         EX_MemRead,

@@ -18,6 +18,7 @@ module HazardDetectionUnit (
     input [4:0]  EX_Rd,
     input [4:0]  MEM_RegDst,
     input [1:0] ForwardA,
+    input       ID_Jump,
     output reg   ID_Stall,
     output reg   Flush_IF_ID
 );
@@ -41,7 +42,7 @@ module HazardDetectionUnit (
         MEMStall = 0;
         BranchStall = 0;
     
-        if (ID_Branch) begin
+        if (ID_Branch || ID_Jump) begin
             BranchStall = 1;
         end
 
@@ -72,6 +73,7 @@ module HazardDetectionUnit (
             end 
 //            if(BranchStall) begin
 //                ID_Stall <= 1;
+//                Flush_IF_ID <= 1; // Flush IF/ID
 //            end
     end
     
