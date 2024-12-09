@@ -31,21 +31,26 @@ module ForwardingUnit(
     output reg ForwardB               // Forwarding control for ALU input B
 );
 
+   // This always block is sensitive to any changes in the input signals.
     always @(*) begin
-        // Default: no forwarding
+        // Initialize forwarding control signals to default values:
+        // - ForwardA = 2'b00: No forwarding for ALU input A
+        // - ForwardB = 1'b0: No forwarding for ALU input B
         ForwardA = 2'b00;
         ForwardB = 1'b0;
 
-        // Check for hazards for EX_Rs (ALU input A)
+        // Hazard detection for EX_Rs (ALU input A)
+        // If the MEM stage is writing to a register and the destination register matches EX_Rs:
         if (MEM_RegWrite != 2'b00 && MEM_RegWriteAddress != 5'b0 && MEM_RegWriteAddress == EX_Rs)
-            ForwardA = 2'b10; // Forward from MEM stage
+            ForwardA = 2'b10; // Forward data from the MEM stage to the EX stage for input A
+        // If the WB stage is writing to a register and the destination register matches EX_Rs:
         else if (WB_RegWrite != 2'b00 && WB_RegWriteAddress != 5'b0 && WB_RegWriteAddress == EX_Rs)
-            ForwardA = 2'b01; // Forward from WB stage
+            ForwardA = 2'b01; // Forward data from the WB stage to the EX stage for input A
 
-
-        // Check for hazards for EX_Rt (ALU input B)
+        // Hazard detection for EX_Rt (ALU input B)
+        // If the MEM stage is writing to a register and the destination register matches EX_Rt:
         if (MEM_RegWrite != 2'b00 && MEM_RegWriteAddress != 5'b0 && MEM_RegWriteAddress == EX_Rt)
-            ForwardB = 1'b1; // Forward from MEM stage
+            ForwardB = 1'b1; // Forward data from the MEM stage to the EX stage for input B
     end
 
 endmodule

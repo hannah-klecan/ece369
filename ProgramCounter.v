@@ -24,14 +24,14 @@ module ProgramCounter(
             output_address <= 32'b0;
         end
         else begin
-            if(PCSrc > 0) begin
-                output_address <= input_address;
-                last_instruction <= input_address;
+            if(PCSrc > 0) begin                         //If branch or jump instruction, save/update address of instruction
+                output_address <= input_address;        //Needed when either instruction comes up while Stalling
+                last_instruction <= input_address;      //Or instruction gets overwritten/lost
             end
-            else if (Stall_in == 1) begin
+            else if (Stall_in == 1) begin               //If stalling, disregard instruction
                 output_address <= last_instruction;
             end
-            else begin
+            else begin                                  //If instruction and no stall, carry on as normal
                 output_address <= input_address;
                 last_instruction <= input_address;
             end
