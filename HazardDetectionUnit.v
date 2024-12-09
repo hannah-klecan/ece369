@@ -13,9 +13,11 @@ module HazardDetectionUnit (
     input        MEM_RegWrite,
     input        MEM_ZeroANDBranch,
     input [1:0]  EX_RegDstSignal,
+    input [4:0]  EX_Rs,
     input [4:0]  EX_Rt,
     input [4:0]  EX_Rd,
     input [4:0]  MEM_RegDst,
+    input [1:0] ForwardA,
     output reg   ID_Stall,
     output reg   Flush_IF_ID
 );
@@ -64,7 +66,7 @@ module HazardDetectionUnit (
             if (EXStall || MEMStall || BranchStall) begin
                 StallCounter <= 2; // Two-cycle stall for load-use hazard
                 ID_Stall <= 1;
-                if (MEM_ZeroANDBranch == 1) begin
+                if(BranchStall) begin
                     Flush_IF_ID <= 1; // Flush IF/ID
                 end
             end 
@@ -80,11 +82,15 @@ module HazardDetectionUnit (
             StallCounter <= 0;
         end 
         else begin
+            if(ForwardA == 2'b01) begin
+                StallCounter <= 0;              //Stop Stalling if forwarding from WB
+                ID_Stall <= 0;
+            end
             if (StallCounter > 0) begin
                 // Decrement stall counter during multi-cycle stalls
                 StallCounter <= StallCounter - 1;
                 ID_Stall <= 1;
-                Flush_IF_ID <= 1; // Continue flushing during stall
+//                Flush_IF_ID <= 1; // Continue flushing during stall
             end 
             else begin
                 // Clear stall and flush signals when the stall counter reaches 0

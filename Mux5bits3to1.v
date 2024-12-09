@@ -23,6 +23,7 @@ always @(Sel or inA or inB or inC) begin
         2'b00: Out = inA; // Select input is 00, output is data0
         2'b01: Out = inB; // Select input is 01, output is data1
         2'b10: Out = inC; // Select input is 10, output is data2
+        default: Out = inA;
     endcase
 end
 

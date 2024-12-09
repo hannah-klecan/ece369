@@ -52,6 +52,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire Flush_IF_ID;
     
     //EX Wires
+    wire [4:0] EX_Rs;
     wire [1:0] EX_PCSrc;
     wire EX_MemToReg;
     wire [1:0] EX_MemRead;
@@ -78,6 +79,9 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [4:0] EX_RegWriteAddress;
     wire EX_Shift;
     wire [31:0] EX_ALUInput1;
+    wire [31:0] EX_ALUInput2;
+    wire [1:0] ForwardA;           // Forwarding control signal for ALU input A
+    wire ForwardB;                 // Forwarding control signal for ALU input B
     
     //MEM Wires
     wire MEM_MemToReg;
@@ -106,6 +110,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [31:0] WB_PCAddResult;
     wire [31:0] WB_MemReadData;
     wire [31:0] WB_WBToWD;
+    
+   
  
     // IF
     // ProgramCounter(Clk, Reset, input_address, output_address)
@@ -152,7 +158,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         IF_PCOutput, 
         IF_PCAddResult,
         ID_Stall,
-        Flush_IF_ID, 
+        Flush_IF_ID,
+        ID_Branch, 
         ID_Instruction,
         ID_PCOutput, 
         ID_PCAddResult);
@@ -226,9 +233,11 @@ module TopModule(Clk, Reset, PCResult, WriteData);
             MEM_RegWrite,
             MEM_ZeroANDBranch,
             EX_RegDst,
+            EX_Rs,
             EX_Instruction26b[20:16],
             EX_Instruction26b[15:11],
             MEM_RegWriteAddress,
+            ForwardA,
             ID_Stall,
             Flush_IF_ID
         );
@@ -248,6 +257,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_ReadData1,
         ID_ReadData2,
         ID_SEOutput,
+        ID_Instruction[25:21],
         ID_Instruction[25:0],
         ID_PCOutput,
         ID_Jal,
@@ -266,6 +276,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         EX_ReadData1,
         EX_ReadData2,
         EX_SEOutput,
+        EX_Rs,
         EX_Instruction26b,
         EX_PCOutput,
         EX_Jal,
@@ -299,19 +310,48 @@ module TopModule(Clk, Reset, PCResult, WriteData);
 //        EX_ALUInput1,
 //        EX_AlUInput1 // shifted
 //    );
+
+//    // Mux32bits2to1(inA, inB, Sel, Out)
+//    Mux32bits2to1 _ALUSrcMux( 
+//        EX_ReadData2, 
+//        EX_SEOutput, 
+//        EX_ALUSrc,
+//        EX_ALUSrcOutput);
+
+    // Forwarding Unit instantiation
+    ForwardingUnit _ForwardingUnit (
+        EX_Rs,
+        EX_Instruction26b[20:16],
+        MEM_RegWriteAddress,
+        WB_RegWriteAddress,
+        MEM_RegWrite,
+        WB_RegWrite,
+        ForwardA,
+        ForwardB);
         
-    // Mux32bits2to1(inA, inB, Sel, Out)
-    Mux32bits2to1 _ALUSrcMux( 
-        EX_ReadData2, 
-        EX_SEOutput, 
-        EX_ALUSrc,
-        EX_ALUSrcOutput);
+    // Mux5bits3to1(inA, inB, inC, Sel, Out)
+    ForwardingMuxA _ForwardingMuxA(
+       EX_ReadData1,
+       MEM_ALUResult,
+       WB_WBToWD,
+       ForwardA,
+       EX_ALUControlOutput,
+       EX_ALUInput1);
+        
+
+    ForwardingMuxB _ForwardingMuxB(
+        EX_ReadData2,
+        EX_SEOutput,
+        MEM_ALUResult,
+        {ForwardB, EX_ALUSrc},
+        EX_ALUControlOutput,
+        EX_ALUInput2);
         
     // ALU(ALUControl, A, B, ALUResult, Zero)
     ALU _ALU(
         EX_ALUControlOutput, 
-        EX_ReadData1,                       // Changed from EX_AlUInput1 as it should be taking straight from Reg file
-        EX_ALUSrcOutput, 
+        EX_ALUInput1,                       // Changed from EX_AlUInput1 as it should be taking straight from Reg file
+        EX_ALUInput2, 
         EX_ALUResult, 
         EX_Zero);
     
