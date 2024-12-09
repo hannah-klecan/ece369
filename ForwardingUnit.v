@@ -42,6 +42,7 @@ module ForwardingUnit(
         else if (WB_RegWrite != 2'b00 && WB_RegWriteAddress != 5'b0 && WB_RegWriteAddress == EX_Rs)
             ForwardA = 2'b01; // Forward from WB stage
 
+
         // Check for hazards for EX_Rt (ALU input B)
         if (MEM_RegWrite != 2'b00 && MEM_RegWriteAddress != 5'b0 && MEM_RegWriteAddress == EX_Rt)
             ForwardB = 1'b1; // Forward from MEM stage

@@ -158,7 +158,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         IF_PCOutput, 
         IF_PCAddResult,
         ID_Stall,
-        Flush_IF_ID, 
+        Flush_IF_ID,
+        ID_Branch, 
         ID_Instruction,
         ID_PCOutput, 
         ID_PCAddResult);
@@ -235,6 +236,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
             EX_Instruction26b[20:16],
             EX_Instruction26b[15:11],
             MEM_RegWriteAddress,
+            ForwardA,
             ID_Stall,
             Flush_IF_ID
         );

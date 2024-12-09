@@ -19,6 +19,7 @@ module IF_IDRegister (
     input [31:0] PCAdderOut_in,
     input Stall_in,
     input Flush_IF_ID,
+    input ID_Branch,
     
     output reg [31:0] Instruction_out,
     output reg [31:0] PCOutput_out,
@@ -31,7 +32,7 @@ always @(posedge Clk) begin
         PCOutput_out <= 0;
         PCAdderOut_out <= 0;
     end
-//    else if (Flush_IF_ID == 1) begin
+//    else if (Flush_IF_ID == 1 && ID_Branch == 0) begin
 //        Instruction_out <= 0;
 //        PCOutput_out <= 0;
 //        PCAdderOut_out <= 0;
