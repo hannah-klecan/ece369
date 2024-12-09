@@ -19,12 +19,15 @@ module HazardDetectionUnit (
     input [4:0]  MEM_RegDst,
     input [1:0] ForwardA,
     input       ID_Jump,
+    input       ID_Jal,
+    input [1:0] ID_PCSrc,
+    input [1:0] MEM_PCSrc,
     output reg   ID_Stall,
     output reg   Flush_IF_ID
 );
 
     reg EXStall, MEMStall, BranchStall;
-    reg [1:0] StallCounter; // Counter for multi-cycle stalls
+    reg [4:0] StallCounter; // Counter for multi-cycle stalls
 
     // Initialize all relevant signals
     initial begin
@@ -42,7 +45,7 @@ module HazardDetectionUnit (
         MEMStall = 0;
         BranchStall = 0;
     
-        if (ID_Branch || ID_Jump) begin
+        if (ID_Branch || ID_Jump || ID_Jal || ID_PCSrc == 2'b11) begin //PCSrc indicates JR instruction
             BranchStall = 1;
         end
 
@@ -65,7 +68,7 @@ module HazardDetectionUnit (
     always @(EXStall, MEMStall, BranchStall) begin
             // If a hazard is detected, start a multi-cycle stall
             if (EXStall || MEMStall || BranchStall) begin
-                StallCounter <= 2; // Two-cycle stall for load-use hazard
+                StallCounter <= 5; // Two-cycle stall for load-use hazard
                 ID_Stall <= 1;
                 if(BranchStall) begin
                     Flush_IF_ID <= 1; // Flush IF/ID
@@ -88,11 +91,16 @@ module HazardDetectionUnit (
                 StallCounter <= 0;              //Stop Stalling if forwarding from WB
                 ID_Stall <= 0;
             end
-            if (StallCounter > 0) begin
+            else if(MEM_PCSrc == 2'b11) begin
+                StallCounter <= 0;              //Stop Stalling if forwarding from WB
+                ID_Stall <= 0;
+            end
+            
+            else if (StallCounter > 0) begin
                 // Decrement stall counter during multi-cycle stalls
                 StallCounter <= StallCounter - 1;
                 ID_Stall <= 1;
-//                Flush_IF_ID <= 1; // Continue flushing during stall
+                Flush_IF_ID <= 1; // Continue flushing during stall
             end 
             else begin
                 // Clear stall and flush signals when the stall counter reaches 0

@@ -5,6 +5,7 @@ module ProgramCounter(
     input wire Reset,        // Reset input
     input wire [31:0] input_address,  // given address
     input Stall_in,
+    input [1:0] PCSrc,
     output reg [31:0] output_address   // output address
 ); 
 
@@ -23,7 +24,11 @@ module ProgramCounter(
             output_address <= 32'b0;
         end
         else begin
-            if (Stall_in == 1) begin
+            if(PCSrc > 0) begin
+                output_address <= input_address;
+                last_instruction <= input_address;
+            end
+            else if (Stall_in == 1) begin
                 output_address <= last_instruction;
             end
             else begin

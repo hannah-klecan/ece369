@@ -7,7 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Controller(Instruction, ShiftCheck, RegWrite, ALUSrc, ALUOp, RegDst, MemWrite, MemRead, MemtoReg, PCSrc, Jal, Branch, Shift, Jump);
+module Controller(Instruction, ShiftCheck, RegWrite, ALUSrc, ALUOp, RegDst, MemWrite, MemRead, MemtoReg, PCSrc, Jal, Branch, Shift, Jump, JR);
 
 // 6-bit inputs for opcode and function fields
 input [5:0] Instruction, ShiftCheck;
@@ -15,13 +15,14 @@ input [5:0] Instruction, ShiftCheck;
 // Output port declarations 
 output reg [1:0] RegWrite, MemWrite, MemRead; 
 output reg [1:0] RegDst;
-output reg ALUSrc, MemtoReg, Jal, Branch, Shift, Jump;
+output reg ALUSrc, MemtoReg, Jal, Branch, Shift, Jump, JR;
 output reg [2:0] PCSrc;
 output reg [3:0] ALUOp;
   
 // Behavioral block triggered by changes to Instruction or ShiftCheck
 always @(Instruction, ShiftCheck) begin
     Jump <= 0;
+    JR <= 0;
     // Case statement based on opcode
     case(Instruction)
     // Each case represents an instruction type
@@ -56,6 +57,7 @@ always @(Instruction, ShiftCheck) begin
             PCSrc <= 2'b11;
             Jal <= 0;
             Shift <= 0;
+            JR <= 1;
          end
          else begin
             ALUSrc <= 0;

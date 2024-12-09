@@ -33,6 +33,7 @@ module ID_EXRegister (
     input Shift_in,
     input Stall_in,
     input Jump,
+    input JR_in,
 
     output reg [1:0] PCSrc_out,
     output reg MemToReg_out,
@@ -51,11 +52,12 @@ module ID_EXRegister (
     output reg Jal_out,
     output reg [1:0]RegDst_out,
     output reg [31:0]PCAdderOut_out,
-    output reg Shift_out
+    output reg Shift_out,
+    output reg JR_out
 );
 
 always @(posedge Clk) begin
-    if (Reset || (Stall_in && !Branch_in && !Jump)) begin
+    if (Reset || (Stall_in && !Branch_in && !Jump && !Jal_in && !JR_in)) begin
         PCSrc_out <= 0;
         MemToReg_out <= 0;
         MemRead_out <= 0;
@@ -74,6 +76,7 @@ always @(posedge Clk) begin
         RegDst_out <= 0;
         PCAdderOut_out <= 0;
         Shift_out <= 0;
+        JR_out <= 0;
     end else begin
         PCSrc_out <= PCSrc_in;
         MemToReg_out <= MemToReg_in;
@@ -93,6 +96,7 @@ always @(posedge Clk) begin
         RegDst_out <= RegDst_in;
         PCAdderOut_out <= PCAdderOut_in;
         Shift_out <= Shift_in;
+        JR_out <= JR_in;
     end
 end
 

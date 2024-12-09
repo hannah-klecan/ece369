@@ -51,6 +51,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire ID_Stall;
     wire Flush_IF_ID;
     wire ID_Jump;
+    wire ID_JR;
     
     //EX Wires
     wire [4:0] EX_Rs;
@@ -83,6 +84,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
     wire [31:0] EX_ALUInput2;
     wire [1:0] ForwardA;           // Forwarding control signal for ALU input A
     wire ForwardB;                 // Forwarding control signal for ALU input B
+    wire EX_JR;
     
     //MEM Wires
     wire MEM_MemToReg;
@@ -121,6 +123,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         Reset, 
         IF_PCInput,
         ID_Stall, 
+        {MEM_PCSrc[1], IF_PCSrcSelector}, 
         IF_PCOutput);
         
     // PCAdder(PCResult, PCAddResult)
@@ -182,7 +185,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_Jal, 
         ID_Branch, 
         ID_Shift,
-        ID_Jump);
+        ID_Jump,
+        ID_JR);
         
     // Mux32bits2to1(inA, inB, Sel, Out)
     Mux32bits2to1 _JalMux(    // checked 
@@ -241,6 +245,9 @@ module TopModule(Clk, Reset, PCResult, WriteData);
             MEM_RegWriteAddress,
             ForwardA,
             ID_Jump,
+            ID_Jal,
+            ID_PCSrc,
+            MEM_PCSrc,
             ID_Stall,
             Flush_IF_ID
         );
@@ -269,6 +276,7 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         ID_Shift,
         ID_Stall,
         ID_Jump,
+        ID_JR,
         EX_PCSrc,
         EX_MemToReg,
         EX_MemRead,
@@ -286,7 +294,8 @@ module TopModule(Clk, Reset, PCResult, WriteData);
         EX_Jal,
         EX_RegDst,
         EX_PCAddResult,
-        EX_Shift
+        EX_Shift,
+        EX_JR
 );
 
     //EX
