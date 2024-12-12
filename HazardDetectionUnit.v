@@ -22,8 +22,8 @@ module HazardDetectionUnit (
     input       ID_Jal,                  // Jump and Link (JAL) instruction in ID stage
     input [1:0] ID_PCSrc,                // PC source control signal in ID stage
     input [1:0] MEM_PCSrc,               // PC source control signal in MEM stage
-    output reg   ID_Stall,               // Stall signal for ID stage
-    output reg   Flush_IF_ID             // Flush signal for IF/ID pipeline register
+    output reg   Stall,               // Stall signal for ID stage
+    output reg   Flush             // Flush signal for IF/ID pipeline register
 );
 
     reg EXStall, MEMStall, BranchStall;  // Intermediate stall signals
@@ -31,11 +31,11 @@ module HazardDetectionUnit (
 
     // Initialize all relevant signals
     initial begin
-        ID_Stall     <= 0;               // No stall initially
+        Stall     <= 0;               // No stall initially
         EXStall      <= 0;               // No EX-stage stall initially
         MEMStall     <= 0;               // No MEM-stage stall initially
         BranchStall  <= 0;               // No branch-related stall initially
-        Flush_IF_ID  <= 0;               // No pipeline flush initially
+        Flush  <= 0;               // No pipeline flush initially
         StallCounter <= 0;               // Stall counter set to 0 initially
     end
 
@@ -70,9 +70,9 @@ module HazardDetectionUnit (
         // If any stall condition is detected, start a multi-cycle stall
         if (EXStall || MEMStall || BranchStall) begin
             StallCounter <= 5;           // Set stall counter for multi-cycle stall
-            ID_Stall <= 1;               // Assert stall signal for ID stage
+            Stall <= 1;               // Assert stall signal for ID stage
             if (BranchStall) begin
-                Flush_IF_ID <= 1;        // Flush the IF/ID pipeline register for branch instructions
+                Flush <= 1;        // Flush the IF/ID pipeline register for branch instructions
             end
         end 
     end
@@ -80,31 +80,32 @@ module HazardDetectionUnit (
     always @(posedge Clk or posedge Reset) begin
         if (Reset) begin
             // Reset all signals on reset
-            ID_Stall     <= 0;
-            Flush_IF_ID  <= 0;
+            Stall     <= 0;
+            Flush  <= 0;
             StallCounter <= 0;
         end 
         else begin
-            if (ForwardA == 2'b01) begin
-                // Stop stalling if data is forwarded from WB stage
-                StallCounter <= 0;
-                ID_Stall <= 0;
-            end
-            else if (MEM_PCSrc == 2'b11) begin
-                // Stop stalling for JR instruction
-                StallCounter <= 0;
-                ID_Stall <= 0;
-            end
-            else if (StallCounter > 0) begin
+//            if (ForwardA == 2'b01) begin
+//                // Stop stalling if data is forwarded from WB stage
+//                StallCounter <= 0;
+//                Stall <= 0;
+//            end
+//            else if (MEM_PCSrc == 2'b11) begin
+//                // Stop stalling for JR instruction
+//                StallCounter <= 0;
+//                Stall <= 0;
+//            end
+//            else if (StallCounter > 0) begin
+            if (StallCounter > 0) begin
                 // Decrement stall counter during multi-cycle stalls
                 StallCounter <= StallCounter - 1;
-                ID_Stall <= 1;           // Keep stalling
-                Flush_IF_ID <= 1;        // Keep flushing pipeline during stall
+//                Stall <= 1;           // Keep stalling
+//                Flush <= 1;        // Keep flushing pipeline during stall
             end 
             else begin
                 // Clear stall and flush signals when stall counter reaches 0
-                ID_Stall <= 0;
-                Flush_IF_ID <= 0;
+                Stall <= 0;
+                Flush <= 0;
             end
         end
     end
